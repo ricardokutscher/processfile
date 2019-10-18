@@ -60,10 +60,10 @@ public class FileWatcher {
     private Boolean validateFile(WatchEvent event) {
         Matcher result = lineParser.getTokens(event.context().toString(), "([\\s\\S]+)("+validFormats+")$");
         if (event.kind() == ENTRY_CREATE && result.find()) {
-            logger.info("Valid file to process, file: " + event.context().toString());
+            logger.info("Valid file to process, file: {}", event.context().toString());
             return true;
         }
-        logger.info("Invalid file to process, file: " + event.context().toString());
+        logger.info("Invalid file to process, file: {}", event.context().toString());
         return false;
     }
 
@@ -71,8 +71,8 @@ public class FileWatcher {
         try {
             List<Object> lines = inputFileService.process(watchEvent.context().toString());
             outputFileService.process(lines, watchEvent.context().toString());
-        } catch (IOException e) {
-            logger.error("Could not process file. Error: ", e.getStackTrace().toString());
+        } catch (Exception e) {
+            logger.error("Could not process file. Error: {}", e.getMessage());
         }
     }
 }

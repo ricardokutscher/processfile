@@ -1,6 +1,7 @@
 package com.kutscher.fileprocess.service;
 
 import com.kutscher.fileprocess.dto.factory.LineFileFactory;
+import com.kutscher.fileprocess.exception.InvalidLineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class InputFileService {
@@ -24,25 +26,18 @@ public class InputFileService {
         this.fileService = fileService;
     }
 
-    public List<Object> process(String fileName) throws IOException {
-        logger.info("Processing file: " + fileName);
-        return processInput(fileName);
-    }
-    
-    public List<Object> processInput(String fileName) throws IOException {
-        List<Object> lines = new ArrayList<Object>();
-        fileService.readLinesFile(fileName)
-            .forEach(line -> {
-                logger.info("Processing line: " + line);
-                lineFileFactory.get()
-                    .filter(o -> o.isValid(line))
-                    .findAny()
-                    .flatMap(o -> o.parse(line))
-                    .ifPresent(x -> lines.add(x));
-            });
-        return lines;
+    public List<Object> process(String fileName) throws Exception {
+        return fileService.readLinesFile(fileName)
+                .map(line -> parseLine(line))
+                .collect(Collectors.toList());
     }
 
-
+    private Object parseLine(String line) throws InvalidLineException {
+        return lineFileFactory.get()
+                .filter(o -> o.isValid(line))
+                .findFirst()
+                .flatMap(x -> x.parse(line))
+                .orElseThrow(() -> new InvalidLineException("File has invalid line. Please correct line with: " + line));
+    }
 
 }

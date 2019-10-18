@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -28,14 +29,14 @@ public class OutputFileService {
     }
 
     public void process(List<Object> listLines, String fileName) throws IOException {
-        logger.info("Processing line: " + listLines.toString());
+        logger.info("Processing line: {}", listLines.toString());
         List<String> lines = new ArrayList<String>();
         Map<Class, ?> map = listLines.stream().collect(Collectors.groupingBy(Object::getClass));
         List<Sale> sales = (List<Sale>) map.get(Sale.class);
         List<Salesman> salesmens = (List<Salesman>) map.get(Salesman.class);
         List<Customer> customers = (List<Customer>) map.get(Customer.class);
 
-        logger.info("Processing line: " + customers.toString());
+        logger.info("Processing line: {}", customers.toString());
         lines.add("Total clients: " + getTotalSalesman(salesmens));
         lines.add("Total customer: " + getTotalCustomer(customers));
         lines.add("Most expensive sale: " + getExpensiveSale(sales));
@@ -44,26 +45,32 @@ public class OutputFileService {
     }
 
     private Integer getTotalSalesman(List<Salesman> list){
-        return list.stream().distinct().collect(Collectors.toList()).size();
+        return Optional.ofNullable(list)
+                .map(x -> x.stream().distinct().collect(Collectors.toList()).size())
+                .orElse(0);
     }
 
     private Integer getTotalCustomer(List<Customer> list){
-        return list.stream().distinct().collect(Collectors.toList()).size();
+        return Optional.ofNullable(list)
+                .map(x -> x.stream().distinct().collect(Collectors.toList()).size())
+                .orElse(0);
     }
 
     private String getExpensiveSale(List<Sale> list){
-        return list.stream()
-                .sorted(comparing(Sale::getTotalOrder).reversed()).findFirst().get().getSaleId();
+        return Optional.ofNullable(list)
+                .map(x -> x.stream()
+                        .sorted(comparing(Sale::getTotalOrder).reversed()).findFirst().get().getSaleId())
+                .orElse("Not found");
     }
 
     private String getWorstSalesman(List<Sale> list){
-        return list.stream()
-                .collect(Collectors.groupingBy(Sale::getSalesName,
-                        Collectors.reducing(BigDecimal.ZERO, Sale::getTotalOrder, BigDecimal::add)))
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue()).findFirst().get().getKey();
+        return Optional.ofNullable(list)
+                .map(x -> x.stream()
+                        .collect(Collectors.groupingBy(Sale::getSalesName,
+                                Collectors.reducing(BigDecimal.ZERO, Sale::getTotalOrder, BigDecimal::add)))
+                        .entrySet()
+                        .stream()
+                        .sorted(Map.Entry.comparingByValue()).findFirst().get().getKey())
+                .orElse("Not found");
     }
-
-
 }
