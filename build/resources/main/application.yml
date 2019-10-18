@@ -1,0 +1,4 @@
+file:
+  input: //data//in
+  output: //data//out
+  valid-format: .dat
