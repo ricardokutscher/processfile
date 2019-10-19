@@ -5,6 +5,7 @@ import com.kutscher.fileprocess.utils.LineParser;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 @Component
 public class CustomerParser implements LineFileParser {
@@ -17,10 +18,11 @@ public class CustomerParser implements LineFileParser {
 
     @Override
     public Optional<Object> parse(String line) {
+        Matcher matcher = lineParser.getToken(line, LineParser.EXPRESSION_IS_CUSTOMER);
         return Optional.of(Customer.builder()
-                .CNPJ(lineParser.getResult().group("taxId"))
-                .name(lineParser.getResult().group("name"))
-                .businessArea(lineParser.getResult().group("businessArea"))
+                .CNPJ(matcher.group("taxId"))
+                .name(matcher.group("name"))
+                .businessArea(matcher.group("businessArea"))
                 .build());
     }
 

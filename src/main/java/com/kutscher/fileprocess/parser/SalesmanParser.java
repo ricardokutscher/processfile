@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 @Component
 public class SalesmanParser implements LineFileParser {
@@ -18,10 +19,11 @@ public class SalesmanParser implements LineFileParser {
 
     @Override
     public Optional<Object> parse(String line) {
+        Matcher matcher = lineParser.getToken(line, LineParser.EXPRESSION_IS_SALESMAN);
         return Optional.of(Salesman.builder()
-                .cpf(lineParser.getResult().group("taxId"))
-                .name(lineParser.getResult().group("name"))
-                .salary(new BigDecimal(lineParser.getResult().group("salary")))
+                .cpf(matcher.group("taxId"))
+                .name(matcher.group("name"))
+                .salary(new BigDecimal(matcher.group("salary")))
                 .build());
     }
 

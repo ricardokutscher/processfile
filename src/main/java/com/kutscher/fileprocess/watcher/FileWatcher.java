@@ -58,7 +58,7 @@ public class FileWatcher {
     }
 
     private Boolean validateFile(WatchEvent event) {
-        Matcher result = lineParser.getTokens(event.context().toString(), "([\\s\\S]+)("+validFormats+")$");
+        Matcher result = lineParser.getAllTokens(event.context().toString(), "([\\s\\S]+)("+validFormats+")$");
         if (event.kind() == ENTRY_CREATE && result.find()) {
             logger.info("Valid file to process, file: {}", event.context().toString());
             return true;
@@ -68,11 +68,14 @@ public class FileWatcher {
     }
 
     private void proccessFile(WatchEvent watchEvent){
-        try {
-            List<Object> lines = inputFileService.process(watchEvent.context().toString());
-            outputFileService.process(lines, watchEvent.context().toString());
-        } catch (Exception e) {
-            logger.error("Could not process file. Error: {}", e.getMessage());
-        }
+        new Thread(() -> {
+            try {
+                logger.info("Init processing file: {}", watchEvent.context().toString());
+                List<Object> lines = inputFileService.process(watchEvent.context().toString());
+                outputFileService.process(lines, watchEvent.context().toString());
+            } catch (Exception e) {
+                logger.error("Could not process file. Error: {}", e.getMessage());
+            }
+        }).start();
     }
 }

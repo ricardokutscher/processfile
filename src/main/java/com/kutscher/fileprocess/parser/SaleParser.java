@@ -22,9 +22,10 @@ public class SaleParser implements LineFileParser {
 
     @Override
     public Optional<Object> parse(String line) {
+        Matcher matcher = lineParser.getToken(line, LineParser.EXPRESSION_IS_SALE);
         return Optional.of(Sale.builder()
-                .salesName(lineParser.getResult().group("salesman"))
-                .saleId(lineParser.getResult().group("saleId"))
+                .salesName(matcher.group("salesman"))
+                .saleId(matcher.group("saleId"))
                 .sales(getItens(line))
                 .totalOrder(
                         getItens(line).stream()
@@ -35,7 +36,7 @@ public class SaleParser implements LineFileParser {
 
     public List<Item> getItens(String line){
         List<Item> list = new ArrayList<Item>();
-        Matcher matchers = lineParser.getTokens(line, LineParser.EXPRESSION_GET_ATTRIBUTES_ITEM);
+        Matcher matchers = lineParser.getAllTokens(line, LineParser.EXPRESSION_GET_ATTRIBUTES_ITEM);
         while(matchers.find()){
             list.add(Item.builder()
                     .itemId(Integer.valueOf(matchers.group("itemId")))

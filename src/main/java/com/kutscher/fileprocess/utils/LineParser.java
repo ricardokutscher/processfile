@@ -39,11 +39,6 @@ public class LineParser {
 	public static final String EXPRESSION_GET_ATTRIBUTES_ITEM = "((?<itemId>[0-9]+)-(?<quantity>[0-9]{0,9}+)-(?<value>[0-9]*\\.?[0-9]+))+";
 
 	/**
-	 * Matcher result - contains the result of expression
-	 */
-	private static Matcher result;
-
-	/**
 	 * Return if is a valid string and set the this.result with the groups
 	 * @param line
 	 * @param expression
@@ -52,8 +47,7 @@ public class LineParser {
 	public Boolean verifyExpression(String line, String expression) {
 		try {
 			Pattern pattern = Pattern.compile(expression);
-			result = pattern.matcher(line);
-			if (result.find()) {
+			if (pattern.matcher(line).find()) {
 				return true;
 			}
 		}catch (Exception e) {
@@ -68,18 +62,22 @@ public class LineParser {
 	 * @param expression
 	 * @return
 	 */
-	public Matcher getTokens(String line, String expression) {
+	public Matcher getAllTokens(String line, String expression) {
 		Pattern pattern = Pattern.compile(expression);
-		result = pattern.matcher(line);
-		return result;
+		return pattern.matcher(line);
 	}
+
 
 	/**
-	 * Return the (Matcher) result with the groups
+	 * Returns the tokens found in the string.
+	 * @param line
+	 * @param expression
 	 * @return
 	 */
-	public Matcher getResult() {
+	public Matcher getToken(String line, String expression) {
+		Pattern pattern = Pattern.compile(expression);
+		Matcher result = pattern.matcher(line);
+		result.find();
 		return result;
 	}
-
 }
